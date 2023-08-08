@@ -1,99 +1,80 @@
+// JavaScript code
+let userRegistrations = [];
 
-  <script>
-    // Load existing entries from localStorage on page load
-    window.addEventListener('load', function () {
-      const entries = JSON.parse(localStorage.getItem('entries')) || [];
-      const entriesList = document.getElementById('entries-list');
-
-      entries.forEach(entry => {
-        const entryRow = document.createElement('tr');
-        const nameCell = document.createElement('td');
-        const emailCell = document.createElement('td');
-        const dobCell = document.createElement('td');
-        const termsCell = document.createElement('td');
-
-        nameCell.textContent = entry.name;
-        emailCell.textContent = entry.email;
-        dobCell.textContent = entry.dob;
-        termsCell.textContent = entry.acceptedTerms ? 'Yes' : 'No';
-
-        entryRow.appendChild(nameCell);
-        entryRow.appendChild(emailCell);
-        entryRow.appendChild(dobCell);
-        entryRow.appendChild(termsCell);
-
-        entriesList.appendChild(entryRow);
-      });
-    });
-
-    document.getElementById('registration-form').addEventListener('submit', function (event) {
-      event.preventDefault();
-
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const dob = document.getElementById('dob').value;
-      const acceptedTerms = document.getElementById('accepted-terms').checked;
-
-      const currentDate = new Date();
-      const userDob = new Date(dob);
-      const age = currentDate.getFullYear() - userDob.getFullYear();
-
-      const errorMessageContainer = document.getElementById('error-message');
-      errorMessageContainer.innerHTML = '';
-
-      if (!isValidEmail(email)) {
-        const errorElement = document.createElement('p');
-        errorElement.classList.add('text-red-600', 'text-sm');
-        errorElement.textContent = 'Invalid email address';
-        errorMessageContainer.appendChild(errorElement);
-        return;
-      }
-
-      if (age < 18 || age > 55) {
-        const errorElement = document.createElement('p');
-        errorElement.classList.add('text-red-600', 'text-sm');
-        errorElement.textContent = 'Age must be between 18 and 55';
-        errorMessageContainer.appendChild(errorElement);
-        return;
-      }
-
-      errorMessageContainer.innerHTML = ''; // Clear error messages
-
-      const entry = {
-        name: name,
-        email: email,
-        dob: dob,
-        acceptedTerms: acceptedTerms
-      };
-
-      const entries = JSON.parse(localStorage.getItem('entries')) || [];
-      entries.push(entry);
-      localStorage.setItem('entries', JSON.stringify(entries));
-
-      const entryRow = document.createElement('tr');
-      const nameCell = document.createElement('td');
-      const emailCell = document.createElement('td');
-      const dobCell = document.createElement('td');
-      const termsCell = document.createElement('td');
-
-      nameCell.textContent = name;
-      emailCell.textContent = email;
-      dobCell.textContent = dob;
-      termsCell.textContent = acceptedTerms ? 'Yes' : 'No';
-
-      entryRow.appendChild(nameCell);
-      entryRow.appendChild(emailCell);
-      entryRow.appendChild(dobCell);
-      entryRow.appendChild(termsCell);
-
-      document.getElementById('entries-list').appendChild(entryRow);
-
-      // Clear the form after submission
-      document.getElementById('registration-form').reset();
-    });
-
-    function isValidEmail(email) {
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailPattern.test(email);
+const validateDateOfBirth = (dateString) => {
+    const today = new Date();
+    const dob = new Date(dateString);
+    const age = today.getFullYear() - dob.getFullYear();
+    if (age < 18 || age > 55) {
+        return false;
     }
-  </script>
+    return true;
+}
+
+const saveRegistrationForm = (event) => {
+    event.preventDefault();
+
+    const fullName = document.getElementById("fullName").value;
+    const email = document.getElementById("email").value;
+    const dob = document.getElementById("dob").value;
+    const agreedTerms = document.getElementById("agree-terms").checked;
+
+    if (!validateDateOfBirth(dob)) {
+        document.getElementById("dob-error").textContent = "Date of Birth must be between 18 and 55 years.";
+        return;
+    } else {
+        document.getElementById("dob-error").textContent = "";
+    }
+
+    const registration = {
+        fullName: fullName,
+        email: email,
+        dateOfBirth: dob,
+        agreedTerms: agreedTerms
+    }
+
+    userRegistrations.push(registration);
+    localStorage.setItem("userRegistrations", JSON.stringify(userRegistrations));
+    displayRegistrations();
+
+    document.getElementById("fullName").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("dob").value = "";
+    document.getElementById("agree-terms").checked = false;
+}
+
+const displayRegistrations = () => {
+    const registrations = getStoredRegistrations();
+    const tableBody = document.getElementById("entriesTableBody");
+    tableBody.innerHTML = "";
+
+    registrations.forEach((registration) => {
+        const row = tableBody.insertRow();
+        const nameCell = row.insertCell(0);
+        const emailCell = row.insertCell(1);
+        const dobCell = row.insertCell(2);
+        const agreedTermsCell = row.insertCell(3);
+
+        nameCell.textContent = registration.fullName;
+        emailCell.textContent = registration.email;
+        dobCell.textContent = registration.dateOfBirth;
+        agreedTermsCell.textContent = registration.agreedTerms ? "Yes" : "No";
+    });
+}
+
+const getStoredRegistrations = () => {
+    let registrations = localStorage.getItem("userRegistrations");
+    if (registrations) {
+        registrations = JSON.parse(registrations);
+    } else {
+        registrations = [];
+    }
+    return registrations;
+}
+
+const registrationForm = document.getElementById("registration-form");
+registrationForm.addEventListener("submit", saveRegistrationForm);
+
+// Load and display registrations on page load
+userRegistrations = getStoredRegistrations();
+displayRegistrations();
