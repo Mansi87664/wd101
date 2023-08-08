@@ -1,49 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registration Form</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Registration Form</title>
 </head>
-<body class="bg-gray-300">
-  <div class="container mx-auto p-6">
-    <h1 class="text-3xl font-semibold mb-6 text-center text-blue-600">Registration Form</h1>
-
-    <form id="registration-form" class="bg-white rounded-lg shadow p-6 flex flex-col gap-4">
-        <label class="block font-semibold mb-1" for="name">Name</label>
-        <input class="block w-full px-3 py-2 border rounded-md" type="text" id="name" required>
-  
-        <label class="block font-semibold mb-1 mt-4" for="email">Email</label>
-        <input class="block w-full px-3 py-2 border rounded-md" type="email" id="email" required>
-  
-        <label class="block font-semibold mb-1 mt-4" for="password">Password</label>
-        <input class="block w-full px-3 py-2 border rounded-md" type="password" id="password" required>
-  
-        <label class="block font-semibold mb-1 mt-4" for="dob">Date of Birth</label>
-        <input class="block w-full px-3 py-2 border rounded-md" type="date" id="dob" required>
-  
-        <label class="block font-semibold mt-4 mb-2" for="accepted-terms">
-          <input class="mr-2 leading-tight" type="checkbox" id="accepted-terms" required>
-          <span class="text-sm">Accept Terms</span>
-        </label>
-      <button class="mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700" type="submit">Submit</button>
-    </form>
-
-    <div id="submitted-entries" class="mt-8">
-      <h2 class="text-xl font-semibold mb-4 text-blue-600">Submitted Entries</h2>
-      <table class="w-full border-collapse border border-gray-300 rounded-md">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="py-2 px-4 border border-gray-300">Name</th>
-            <th class="py-2 px-4 border border-gray-300">Email</th>
-            <th class="py-2 px-4 border border-gray-300">Dob</th>
-            <th class="py-2 px-4 border border-gray-300">Accepted terms?</th>
-          </tr>
-        </thead>
-        <tbody id="entries-list"></tbody>
-      </table>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full p-6 bg-white rounded shadow-md">
+        <h2 class="text-2xl font-semibold text-center mb-4">Registration Form</h2>
+        <form id="registration-form" class="space-y-4">
+            <div>
+                <label for="fullName" class="block mb-1">Full Name</label>
+                <input type="text" id="fullName" class="w-full px-3 py-2 border rounded focus:outline-none focus:border-purple-500" required>
+            </div>
+            <div>
+                <label for="email" class="block mb-1">Email</label>
+                <input type="email" id="email" class="w-full px-3 py-2 border rounded focus:outline-none focus:border-purple-500" required>
+            </div>
+            <div>
+                <label for="dob" class="block mb-1">Date of Birth</label>
+                <input type="date" id="dob" class="w-full px-3 py-2 border rounded focus:outline-none focus:border-purple-500" required>
+                <p id="dob-error" class="text-red-500 text-sm mt-1"></p>
+            </div>
+            <div>
+                <label class="flex items-center">
+                    <input type="checkbox" id="agree-terms" class="mr-2">
+                    I agree to the terms and conditions
+                </label>
+            </div>
+            <div>
+                <button type="submit" class="w-full bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-400 focus:outline-none focus:border-purple-500">
+                    Register
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
+    <div class="max-w-md w-full mt-4 bg-white rounded shadow-md p-6">
+        <h2 class="text-lg font-semibold mb-2">Entries</h2>
+        <div id="registrationDetailsDiv" class="overflow-x-auto">
+            <table class="table-auto w-full">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2">Full Name</th>
+                        <th class="px-4 py-2">Email</th>
+                        <th class="px-4 py-2">Date of Birth</th>
+                        <th class="px-4 py-2">Agreed Terms</th>
+                    </tr>
+                </thead>
+                <tbody id="entriesTableBody">
+                    <!-- Entries will be displayed here dynamically using JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Separated JavaScript code
+        let registrationForm = document.getElementById("registration-form");
+        const entriesTableBody = document.getElementById("entriesTableBody");
+        const dobError = document.getElementById("dob-error");
+
+        // Function to display saved registrations
+        const displayRegistrations = () => {
+            entriesTableBody.innerHTML = ""; // Clear existing entries
+            const registrations = getStoredRegistrations();
+            registrations.forEach((registration) => {
+                const row = document.createElement("tr");
+                const nameCell = createTableCell(registration.fullName);
+                const emailCell = createTableCell(registration.email);
+                const dobCell = createTableCell(registration.dateOfBirth);
+                const agreedTermsCell = createTableCell(registration.agreedTerms ? "Yes" : "No");
+                row.appendChild(nameCell);
+                row.appendChild(emailCell);
+                row.appendChild(dobCell);
+                row.appendChild(agreedTermsCell);
+                entriesTableBody.appendChild(row);
+            });
+        }
+
+        // Function to create a table cell
+        const createTableCell = (text) => {
+            const cell = document.createElement("td");
+            cell.classList.add("border", "px-4", "py-2");
+            cell.textContent = text;
+            return cell;
+        }
+
+    </script>
 </body>
 </html>
+
