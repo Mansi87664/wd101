@@ -1,4 +1,5 @@
-<script>
+
+  <script>
     // Load existing entries from localStorage on page load
     window.addEventListener('load', function () {
       const entries = JSON.parse(localStorage.getItem('entries')) || [];
@@ -37,15 +38,26 @@
       const userDob = new Date(dob);
       const age = currentDate.getFullYear() - userDob.getFullYear();
 
+      const errorMessageContainer = document.getElementById('error-message');
+      errorMessageContainer.innerHTML = '';
+
       if (!isValidEmail(email)) {
-        alert('Invalid email address');
+        const errorElement = document.createElement('p');
+        errorElement.classList.add('text-red-600', 'text-sm');
+        errorElement.textContent = 'Invalid email address';
+        errorMessageContainer.appendChild(errorElement);
         return;
       }
 
       if (age < 18 || age > 55) {
-        alert('Age must be between 18 and 55');
+        const errorElement = document.createElement('p');
+        errorElement.classList.add('text-red-600', 'text-sm');
+        errorElement.textContent = 'Age must be between 18 and 55';
+        errorMessageContainer.appendChild(errorElement);
         return;
       }
+
+      errorMessageContainer.innerHTML = ''; // Clear error messages
 
       const entry = {
         name: name,
